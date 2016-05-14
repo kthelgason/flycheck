@@ -890,20 +890,6 @@
 
 
 ;;; Help for generic checkers
-(ert-deftest flycheck-describe-checker/pops-up-help-buffer ()
-  :tags '(documentation)
-  (dolist (checker (flycheck-defined-checkers))
-    (flycheck-ert-with-help-buffer
-      (shut-up (flycheck-describe-checker checker))
-      (should (buffer-live-p (get-buffer (help-buffer))))
-      (should (get-buffer-window (help-buffer)))
-      (with-current-buffer (help-buffer)
-        (goto-char (point-min))
-        (re-search-forward (rx symbol-start (group (one-or-more not-newline))
-                               symbol-end " is a Flycheck syntax checker"))
-        (should (= (match-beginning 0) 1))
-        (should (string= (match-string 1) (symbol-name checker)))))))
-
 (ert-deftest flycheck-describe-checker/can-navigate-to-source ()
   :tags '(documentation)
   (dolist (checker (flycheck-defined-checkers))
@@ -1127,7 +1113,8 @@
     (flycheck-mode)
     (flycheck-ert-buffer-sync)
     (should flycheck-current-errors)
-    (revert-buffer 'ignore-auto 'no-confirm)
+    (let ((hack-local-variables-hook))
+      (revert-buffer 'ignore-auto 'no-confirm))
     (should-not flycheck-current-errors)
     (should-not (flycheck-deferred-check-p))))
 
